@@ -8,9 +8,17 @@
         body {
             font-family: monospace;
         }
-        .message {
+        .container {
             margin: 0 auto;
             width: 800px;
+        }
+        #title {
+            font-size: 2em;
+        }
+        #message-container {
+            margin-top: 2em;
+        }
+        .message {
         }
         .message, .bytes {
             display: flex;
@@ -42,6 +50,12 @@
     <script src="index.js" defer type="module"></script>
 </head>
 <body>
+
+<div class="container">
+    <div id="title"></div>
+    <p>(press `&lt;` and `&gt;` to change selected message)</p>
+    <div id="message-container"></div>
+</div>
 
 </body>
 </html>

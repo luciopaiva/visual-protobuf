@@ -5,23 +5,58 @@ import ProtobufParser from "./protobuf-parser.js";
 class App {
 
     constructor () {
+        this.titleElem = document.getElementById("title");
+        this.messageContainerElem = document.getElementById("message-container");
+
         this.initialize();
+        /** @tyoe {DataView[]} */
+        this.messages = [];
+        this.selectedMessageIndex = 0;
+
+        window.addEventListener("keypress", this.keypress.bind(this));
+    }
+
+    keypress(event) {
+        switch (event.key) {
+            case ".": {
+                const previousIndex = this.selectedMessageIndex;
+                const newIndex = Math.min(this.selectedMessageIndex + 1, this.messages.length - 1);
+                if (newIndex !== previousIndex) {
+                    this.selectedMessageIndex = newIndex;
+                    this.render();
+                }
+                break;
+            }
+            case ",": {
+                const previousIndex = this.selectedMessageIndex;
+                const newIndex = Math.max(this.selectedMessageIndex - 1, 0);
+                if (newIndex !== previousIndex) {
+                    this.selectedMessageIndex = newIndex;
+                    this.render();
+                }
+                break;
+            }
+        }
     }
 
     /** @return {void} */
     async initialize() {
         const data = await App.downloadData();
-        const messages = App.obtainMessageList(data);
-        const message = messages[0];
+        this.messages = App.obtainMessageList(data);
+        this.render();
+    }
 
-        this.renderMessage(message, document.body);
+    render() {
+        this.titleElem.innerText = `Message ${this.selectedMessageIndex} of ${this.messages.length}`;
+        this.messageContainerElem.innerHTML = "";
+        this.renderMessage(this.messages[this.selectedMessageIndex]);
     }
 
     /**
      * @param {DataView} message
      * @param {HTMLElement} parentContainer
      */
-    renderMessage(message, parentContainer) {
+    renderMessage(message, parentContainer = this.messageContainerElem) {
         const parser = new ProtobufParser();
         parser.parse(message);
 
@@ -49,8 +84,6 @@ class App {
             messageContainer.appendChild(document.createElement("break"));
         }
 
-        const previousContainer = document.querySelector(".bytes");
-        previousContainer && previousContainer.remove();
         parentContainer.appendChild(messageContainer);
     }
 
