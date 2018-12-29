@@ -14,6 +14,15 @@ A protobuf message is just a series of key-value pairs. Each key contains the fi
 
 The key is actually a varint per se. The decoded integer is then analyzed further to collect field type (3 least significant bits) and field number (the rest).
 
+## Input file
+
+VP accepts as input a binary file containing a series of protobuf messages. Each message follows the format:
+
+* message size (16-bit big endian integer)
+* message bytes (`message size` bytes long)
+
+There's no header or footer in the file; just a series of `message size, message bytes` pairs.
+
 ## Limitations
 
 Although most information can be inferred, some things have to be guessed:
