@@ -86,8 +86,9 @@ export default class ProtobufParser {
             case 0:  // varint
                 return this.readVarInt();
             case 1:  // double
+                const doubleValue = this.message.getFloat64(this.pos, true);
                 this.pos += 8;
-                return this.message.getFloat64(this.pos, true);
+                return doubleValue;
             case 2:  // length-delimited, string, byte array
                 const size = Number(this.readVarInt());
                 // ToDo may fail if this is a string or byte array - identify and handle those cases accordingly
@@ -96,8 +97,9 @@ export default class ProtobufParser {
                 this.pos += size;
                 return parser;
             case 5:  // float
+                const floatValue = this.message.getFloat32(this.pos, true);
                 this.pos += 4;
-                return this.message.getFloat32(this.pos, true);
+                return floatValue;
             default:
                 throw new Error("Unknown field type " + fieldType);
         }
