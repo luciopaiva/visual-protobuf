@@ -20,7 +20,7 @@ class ProtobufField {
     makeDescription() {
         switch (this.type) {
             case 0:
-                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value}`;
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value} (0x${this.value.toString(16)})`;
             default:
                 return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}`;
         }
