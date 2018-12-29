@@ -8,6 +8,52 @@ class App {
         this.initialize();
     }
 
+    /** @return {void} */
+    async initialize() {
+        const data = await App.downloadData();
+        const messages = App.obtainMessageList(data);
+        const message = messages[0];
+
+        this.renderMessage(message, document.body);
+    }
+
+    /**
+     * @param {DataView} message
+     * @param {HTMLElement} parentContainer
+     */
+    renderMessage(message, parentContainer) {
+        const parser = new ProtobufParser();
+        parser.parse(message);
+
+        const messageContainer = document.createElement("div");
+        messageContainer.classList.add("message");
+
+        for (const field of parser.fields) {
+            const fieldContainer = document.createElement("div");
+            fieldContainer.classList.add("message-field");
+
+            const bytesContainer = document.createElement("div");
+            bytesContainer.classList.add("bytes");
+            for (let i = field.beginPos; i < field.endPos; i++) {
+                const byteElem = document.createElement("div");
+                byteElem.classList.add("byte");
+                byteElem.innerText = hexPad(message.getUint8(i));
+                bytesContainer.appendChild(byteElem);
+            }
+            fieldContainer.appendChild(bytesContainer);
+            const description = document.createElement("div");
+            description.innerText = field.description;
+            fieldContainer.appendChild(description);
+
+            messageContainer.appendChild(fieldContainer);
+            messageContainer.appendChild(document.createElement("break"));
+        }
+
+        const previousContainer = document.querySelector(".bytes");
+        previousContainer && previousContainer.remove();
+        parentContainer.appendChild(messageContainer);
+    }
+
     /**
      * @param {DataView} data
      * @return {DataView[]}
@@ -24,43 +70,6 @@ class App {
         }
         console.info(`Found ${count} messages`);
         return list;
-    }
-
-    /** @return {void} */
-    async initialize() {
-        const data = await App.downloadData();
-        const message = App.obtainMessageList(data);
-        const firstMessage = message[0];
-
-        const parser = new ProtobufParser();
-        parser.parse(firstMessage);
-
-        const container = document.createElement("div");
-        container.classList.add("bytes");
-
-        let group = null;
-
-        for (let i = 0; i < firstMessage.byteLength; i++) {
-            if (parser.fieldPositions.has(i)) {
-                if (group) {
-                    container.appendChild(group);
-                    container.appendChild(document.createElement("break"));
-                }
-                group = document.createElement("div");
-                group.classList.add("byte-group");
-            }
-            const byteElem = document.createElement("div");
-            byteElem.innerText = hexPad(firstMessage.getUint8(i));
-            group.appendChild(byteElem);
-        }
-        if (group) {
-            container.appendChild(group);
-            container.appendChild(document.createElement("break"));
-        }
-
-        const previousContainer = document.querySelector(".bytes");
-        previousContainer && previousContainer.remove();
-        document.body.appendChild(container);
     }
 
     /**

@@ -7,14 +7,34 @@ FIELD_TYPES.set(3, "start-group");
 FIELD_TYPES.set(4, "end-group");
 FIELD_TYPES.set(5, "float");
 
+class ProtobufField {
+    constructor (id, type, value, beginPos, endPos) {
+        this.id = id;
+        this.type = type;
+        this.value = value;
+        this.beginPos = beginPos;
+        this.endPos = endPos;
+        this.description = this.makeDescription();
+    }
+
+    makeDescription() {
+        switch (this.type) {
+            case 0:
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value}`;
+            default:
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}`;
+        }
+    }
+}
 
 export default class ProtobufParser {
 
-    constructor () {
+    constructor() {
         /** @type {DataView} */
         this.message = null;
         this.pos = 0;
-        this.fieldPositions = new Set();
+        /** @type {ProtobufField[]} */
+        this.fields = [];
     }
 
     hasMoreData() {
@@ -63,10 +83,10 @@ export default class ProtobufParser {
     }
 
     readField() {
-        this.fieldPositions.add(this.pos);
+        const beginPos = this.pos;
         const [fieldNumber, fieldType] = this.readTag();
         const value = this.readValue(fieldType);
-        console.info(`Field id:${fieldNumber}, type ${FIELD_TYPES.get(fieldType)}, value ${value}`);
+        this.fields.push(new ProtobufField(fieldNumber, fieldType, value, beginPos, this.pos));
     }
 
     /**
@@ -83,7 +103,9 @@ export default class ProtobufParser {
         } catch (e) {
             console.error(e);
         }
+    }
 
-        console.info(this.fieldPositions);
+    static get FIELD_TYPES() {
+        return FIELD_TYPES;
     }
 }

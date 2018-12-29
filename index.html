@@ -5,20 +5,27 @@
     <title>Visual Protobuf</title>
 
     <style>
-        .bytes {
+        body {
+            font-family: monospace;
+        }
+        .message {
             margin: 0 auto;
             width: 800px;
         }
-        .bytes, .byte-group {
+        .message, .bytes {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
         }
-        .byte-group {
-            background-color: #cdff8b;
+        .message-field {
+            padding: 2px;
+            margin-bottom: 6px;
         }
-        .byte-group > div {
-            font-family: monospace;
+        .bytes {
+            background-color: #cdff8b;
+            border: 1px solid #66b841;
+        }
+        .byte {
             margin: 2px;
             padding: 2px;
             display: flex;
