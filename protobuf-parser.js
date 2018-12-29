@@ -8,24 +8,34 @@ FIELD_TYPES.set(4, "end-group");
 FIELD_TYPES.set(5, "float");
 
 class ProtobufField {
-    constructor (id, type, value, beginPos, endPos) {
+    constructor (id, type, value, beginPos, endPos, tagSize, valueSize) {
         this.id = id;
         this.type = type;
         this.value = value;
         this.beginPos = beginPos;
         this.endPos = endPos;
+        this.tagSize = tagSize;
+        this.valueSize = valueSize;
         this.description = this.makeDescription();
     }
 
     makeDescription() {
         switch (this.type) {
             case 0:
-                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value} (0x${this.value.toString(16)})`;
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, ` +
+                    `tagSize: ${this.tagSize}, ` +
+                    `valueSize: ${this.valueSize}, ` +
+                    `value: ${this.value} (0x${this.value.toString(16)})`;
             case 1:
             case 5:
-                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value}`;
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, ` +
+                    `tagSize: ${this.tagSize}, ` +
+                    `valueSize: ${this.valueSize}, ` +
+                    `value: ${this.value}`;
             default:
-                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}`;
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, ` +
+                    `tagSize: ${this.tagSize}, ` +
+                    `valueSize: ${this.valueSize} `;
         }
     }
 }
@@ -96,8 +106,10 @@ export default class ProtobufParser {
     readField() {
         const beginPos = this.pos;
         const [fieldNumber, fieldType] = this.readTag();
+        const tagSize = this.pos - beginPos;
         const value = this.readValue(fieldType);
-        this.fields.push(new ProtobufField(fieldNumber, fieldType, value, beginPos, this.pos));
+        const valueSize = this.pos - beginPos - tagSize;
+        this.fields.push(new ProtobufField(fieldNumber, fieldType, value, beginPos, this.pos, tagSize, valueSize));
     }
 
     /**
