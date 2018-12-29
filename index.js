@@ -49,16 +49,19 @@ class App {
     render() {
         this.titleElem.innerText = `Message ${this.selectedMessageIndex} of ${this.messages.length}`;
         this.messageContainerElem.innerHTML = "";
-        this.renderMessage(this.messages[this.selectedMessageIndex]);
+
+        // ToDo cache parser for each message
+        const parser = new ProtobufParser();
+        parser.parse(this.messages[this.selectedMessageIndex]);
+
+        this.renderMessage(parser);
     }
 
     /**
-     * @param {DataView} message
+     * @param {ProtobufParser} parser
      * @param {HTMLElement} parentContainer
      */
-    renderMessage(message, parentContainer = this.messageContainerElem) {
-        const parser = new ProtobufParser();
-        parser.parse(message);
+    renderMessage(parser, parentContainer = this.messageContainerElem) {
 
         const messageContainer = document.createElement("div");
         messageContainer.classList.add("message");
@@ -67,18 +70,24 @@ class App {
             const fieldContainer = document.createElement("div");
             fieldContainer.classList.add("message-field");
 
-            const bytesContainer = document.createElement("div");
-            bytesContainer.classList.add("bytes");
-            for (let i = field.beginPos; i < field.endPos; i++) {
-                const byteElem = document.createElement("div");
-                byteElem.classList.add("byte");
-                byteElem.innerText = hexPad(message.getUint8(i));
-                bytesContainer.appendChild(byteElem);
-            }
-            fieldContainer.appendChild(bytesContainer);
             const description = document.createElement("div");
             description.innerText = field.description;
             fieldContainer.appendChild(description);
+
+            if (field.type === 2) {  // length-delimited field
+                this.renderMessage(field.value, fieldContainer);
+            } else {
+                const bytesContainer = document.createElement("div");
+                bytesContainer.classList.add("bytes");
+                for (let i = field.beginPos; i < field.endPos; i++) {
+                    const byteElem = document.createElement("div");
+                    byteElem.classList.add("byte");
+                    byteElem.innerText = hexPad(parser.message.getUint8(i));
+                    bytesContainer.appendChild(byteElem);
+                }
+
+                fieldContainer.appendChild(bytesContainer);
+            }
 
             messageContainer.appendChild(fieldContainer);
             messageContainer.appendChild(document.createElement("break"));

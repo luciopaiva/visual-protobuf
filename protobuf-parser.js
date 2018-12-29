@@ -21,6 +21,9 @@ class ProtobufField {
         switch (this.type) {
             case 0:
                 return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value} (0x${this.value.toString(16)})`;
+            case 1:
+            case 5:
+                return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}, value: ${this.value}`;
             default:
                 return `id: ${this.id}, type: ${ProtobufParser.FIELD_TYPES.get(this.type)}`;
         }
@@ -33,12 +36,13 @@ export default class ProtobufParser {
         /** @type {DataView} */
         this.message = null;
         this.pos = 0;
+        this.end = 0;
         /** @type {ProtobufField[]} */
         this.fields = [];
     }
 
     hasMoreData() {
-        return this.message && this.pos < this.message.byteLength;
+        return this.pos < this.end;
     }
 
     readByte() {
@@ -63,20 +67,27 @@ export default class ProtobufParser {
     readTag() {
         const tag = this.readVarInt();
         const fieldNumber = Number(tag >> 0x03n);
-        const fieldType = Number(tag & 0x03n);
+        const fieldType = Number(tag & 0x07n);
         return [fieldNumber, fieldType];
     }
 
     readValue(fieldType) {
         switch (fieldType) {
-            case 0: // varint
+            case 0:  // varint
                 return this.readVarInt();
-            // case 1: // double
-            //     break;
-            case 2:
+            case 1:  // double
+                this.pos += 8;
+                return this.message.getFloat64(this.pos, true);
+            case 2:  // length-delimited, string, byte array
                 const size = Number(this.readVarInt());
+                // ToDo may fail if this is a string or byte array - identify and handle those cases accordingly
+                const parser = new ProtobufParser();
+                parser.parse(this.message, this.pos, this.pos + size);
                 this.pos += size;
-                return size;
+                return parser;
+            case 5:  // float
+                this.pos += 4;
+                return this.message.getFloat32(this.pos, true);
             default:
                 throw new Error("Unknown field type " + fieldType);
         }
@@ -91,10 +102,13 @@ export default class ProtobufParser {
 
     /**
      * @param {DataView} message
+     * @param {Number} begin
+     * @param {Number} end
      */
-    parse(message) {
+    parse(message, begin = 0, end = message.byteLength) {
         this.message = message;
-        this.pos = 0;
+        this.pos = begin;
+        this.end = end;
 
         try {
             while (this.hasMoreData()) {
