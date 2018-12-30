@@ -34,6 +34,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
         #menu-description {
             height: 60px;
@@ -50,7 +51,7 @@
         a, a:hover, a:active, a:visited {
             color: var(--color-font);
         }
-        a, .drop-zone {
+        .row a, .row .drop-zone {
             background-color: var(--color-gutter);
             padding: 10px;
             margin: 10px 10px;
@@ -119,6 +120,11 @@
             z-index: -1;
             text-shadow: 0 0 6px var(--color-shadow);
         }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
     </style>
 
     <script src="utils.js" defer type="module"></script>
@@ -136,6 +142,9 @@
         <div id="drop-multiple" class="drop-zone" title="Must be a binary file containing a series of serialized protobuf messages where each message is preceded by a 16-bit big endian field containing its size in bytes">DROP file with multiple messages</div>
     </div>
     <div id="menu-description"></div>
+    <div class="footer">
+        by <a href="https://luciopaiva.com">Lucio Paiva</a> 2018
+    </div>
 </div>
 
 <div class="container hidden">
