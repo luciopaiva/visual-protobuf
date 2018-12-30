@@ -17,6 +17,8 @@ class App {
         this.dropMultiple = document.getElementById("drop-multiple");
         this.dropMultiple.addEventListener("dragover", event => event.preventDefault());
         this.dropMultiple.addEventListener("drop", this.onDrop.bind(this, false));
+        this.buttonClipboard = document.getElementById("clipboard");
+        this.buttonClipboard.addEventListener("click", this.onButtonClipboard.bind(this));
 
         const descElem = document.getElementById("menu-description");
         document.querySelectorAll("#menu > .row > *")
@@ -27,8 +29,14 @@ class App {
         /** @tyoe {DataView[]} */
         this.messages = [];
         this.selectedMessageIndex = 0;
+        this.definition = "";
 
         window.addEventListener("keypress", this.keypress.bind(this));
+    }
+
+    onButtonClipboard(event) {
+        event.preventDefault();
+        navigator.clipboard.writeText(this.definition);
     }
 
     onButtonSample(event) {
@@ -114,7 +122,9 @@ class App {
         const parser = new ProtobufParser();
         parser.parse(this.messages[this.selectedMessageIndex]);
 
+        ProtobufParser.resetGlobalState();
         this.renderMessage(parser);
+        this.definition = parser.toString();
     }
 
     /**
@@ -122,7 +132,6 @@ class App {
      * @param {HTMLElement} parentContainer
      */
     renderMessage(parser, parentContainer = this.messageContainerElem) {
-
         const messageContainer = document.createElement("div");
         messageContainer.classList.add("message");
 

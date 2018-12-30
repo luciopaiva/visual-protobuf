@@ -27,6 +27,7 @@
             width: 800px;
             background-color: var(--color-background);
             padding: 0 10px;
+            position: relative;
         }
         #menu {
             height: 100vh;
@@ -34,7 +35,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
         }
         #menu-description {
             height: 60px;
@@ -125,6 +125,11 @@
             bottom: 10px;
             right: 10px;
         }
+        #clipboard {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 
     <script src="utils.js" defer type="module"></script>
@@ -151,6 +156,7 @@
     <div id="title"></div>
     <p>(press `&lt;` and `&gt;` to change selected message)</p>
     <div id="message-container"></div>
+    <a href="#" id="clipboard">Copy definition to clipboard</a>
 </div>
 
 </body>

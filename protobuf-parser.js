@@ -40,6 +40,10 @@ class ProtobufField {
     }
 }
 
+let nextMessageId = 1;
+/** @type {Map<String, Number>} */
+let messageIdBySignature = new Map();
+
 export default class ProtobufParser {
 
     constructor() {
@@ -49,6 +53,8 @@ export default class ProtobufParser {
         this.end = 0;
         /** @type {ProtobufField[]} */
         this.fields = [];
+        this.messageId = nextMessageId++;
+        this.messageSignature = "";
     }
 
     hasMoreData() {
@@ -115,6 +121,24 @@ export default class ProtobufParser {
     }
 
     /**
+     * @private
+     * @return {Set<Number>}
+     */
+    getRepeatedIds() {
+        const idCounts = new Map();
+        for (const field of this.fields) {
+            idCounts.set(field.id, (idCounts.get(field.id) || 0) + 1);
+        }
+        const repeatedIds = new Set();
+        for (const [id, count] of idCounts.entries()) {
+            if (count > 1) {
+                repeatedIds.add(id);
+            }
+        }
+        return repeatedIds;
+    }
+
+    /**
      * @param {DataView} message
      * @param {Number} begin
      * @param {Number} end
@@ -128,12 +152,69 @@ export default class ProtobufParser {
             while (this.hasMoreData()) {
                 this.readField();
             }
+
+            const idsSeen = new Set();
+
+            for (const field of this.fields) {
+                if (!idsSeen.has(field.id)) {
+                    this.messageSignature += `${field.id}${FIELD_TYPES.get(field.type)}`;
+                    idsSeen.add(field.id);
+                }
+            }
+
+            const existingMessageId = messageIdBySignature.get(this.messageSignature);
+            if (existingMessageId) {
+                this.messageId = existingMessageId;
+            } else {
+                messageIdBySignature.set(this.messageSignature, this.messageId);
+            }
+
         } catch (e) {
             console.error(e);
         }
     }
 
+    toString() {
+        let lines = [];
+        lines.push(`message Message${this.messageId} {`);
+        let nextFieldId = 1;
+
+        const dumpedMessageIds = new Set();
+        const repeatedIds = this.getRepeatedIds();
+        const seenIds = new Set();
+
+        for (const field of this.fields) {
+            if (seenIds.has(field.id)) {
+                continue;
+            }
+            seenIds.add(field.id);
+
+            let type = "???";
+            switch (field.type) {
+                case 0: type = "int64"; break;
+                case 1: type = "double"; break;
+                case 2: type = `Message${field.value.messageId}`; break;
+                case 5: type = "float"; break;
+            }
+            if (field.type === 2 && !dumpedMessageIds.has(field.value.messageId)) {
+                lines.unshift("");
+                lines.unshift(field.value.toString());
+                dumpedMessageIds.add(field.value.messageId);
+            }
+            const occurrence = repeatedIds.has(field.id) ? "repeated" : "optional";
+            lines.push(`  ${occurrence} ${type} field${nextFieldId} = ${nextFieldId};`);
+            nextFieldId++;
+        }
+        lines.push("}");
+        return lines.join("\n");
+    }
+
     static get FIELD_TYPES() {
         return FIELD_TYPES;
+    }
+
+    static resetGlobalState() {
+        nextMessageId = 1;
+        messageIdBySignature = new Map();
     }
 }
