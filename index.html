@@ -5,16 +5,23 @@
     <title>Visual Protobuf</title>
 
     <style>
+        :root {
+            --color-gutter: #ccc;
+            --color-background: white;
+            --color-border: #49d049;
+            --color-byte-background: #cdff8b;
+            --color-shadow: #73b37b;
+        }
         body {
             font-family: sans-serif;
-            background-color: #ccc;
+            background-color: var(--color-gutter);
             padding: 0;
             margin: 0;
         }
         .container {
             margin: 0 auto;
             width: 800px;
-            background-color: white;
+            background-color: var(--color-background);
             padding: 0 10px;
         }
         #title {
@@ -30,8 +37,8 @@
         }
         .message {
             padding: 2px;
-            border: 1px solid #49d049;
-            border-left: 5px solid #49d049;
+            border: 1px solid var(--color-border);
+            border-left: 5px solid var(--color-border);
         }
         .message, .bytes {
             display: flex;
@@ -43,8 +50,8 @@
             margin-bottom: 6px;
         }
         .bytes {
-            background-color: #cdff8b;
-            border: 1px solid #66b841;
+            background-color: var(--color-byte-background);
+            border: 1px solid var(--color-border);
         }
         .byte {
             margin: 2px;
@@ -63,7 +70,7 @@
             transform: rotate(-90deg) translate(-50%, -50%);
             font-size: 2.5em;
             z-index: -1;
-            text-shadow: 0 0 6px #73b37b;
+            text-shadow: 0 0 6px var(--color-shadow);
         }
     </style>
 
