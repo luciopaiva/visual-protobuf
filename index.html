@@ -6,16 +6,26 @@
 
     <style>
         body {
-            font-family: monospace;
+            font-family: sans-serif;
+            background-color: #ccc;
+            padding: 0;
+            margin: 0;
         }
         .container {
             margin: 0 auto;
             width: 800px;
+            background-color: white;
+            padding: 0 10px;
         }
         #title {
-            font-size: 2em;
+            padding-top: 10px;
+            font-size: 1.5em;
+        }
+        .container p {
+            font-size: 0.8em;
         }
         #message-container {
+            font-family: monospace;
             margin-top: 2em;
         }
         .message {
@@ -46,6 +56,15 @@
         break {
             flex-basis: 100%;
         }
+        #banner {
+            position: absolute;
+            left: -80px;
+            top: 0;
+            transform: rotate(-90deg) translate(-50%, -50%);
+            font-size: 2.5em;
+            z-index: -1;
+            text-shadow: 0 0 6px #73b37b;
+        }
     </style>
 
     <script src="utils.js" defer type="module"></script>
@@ -53,6 +72,8 @@
     <script src="index.js" defer type="module"></script>
 </head>
 <body>
+
+<div id="banner">Visual Protobuf</div>
 
 <div class="container">
     <div id="title"></div>
