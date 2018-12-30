@@ -11,6 +11,7 @@
             --color-border: #49d049;
             --color-byte-background: #cdff8b;
             --color-shadow: #73b37b;
+            --color-font: black;
         }
         body {
             font-family: sans-serif;
@@ -18,11 +19,57 @@
             padding: 0;
             margin: 0;
         }
-        .container {
+        .hidden {
+            display: none !important;
+        }
+        .container, #menu {
             margin: 0 auto;
             width: 800px;
             background-color: var(--color-background);
             padding: 0 10px;
+        }
+        #menu {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #menu-description {
+            height: 60px;
+            margin-top: 30px;
+            width: 80%;
+            text-align: center;
+        }
+        .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+        a, a:hover, a:active, a:visited {
+            color: var(--color-font);
+        }
+        a, .drop-zone {
+            background-color: var(--color-gutter);
+            padding: 10px;
+            margin: 10px 10px;
+            border-radius: 10px;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 1px 1px 3px var(--color-font);
+            text-decoration: none;
+            font-size: 1.4em;
+            line-height: 1.8em;
+        }
+        .drop-zone {
+            border: 1px dashed black;
+            box-shadow: none;
+            background-color: #eee;
         }
         #title {
             padding-top: 10px;
@@ -82,7 +129,16 @@
 
 <div id="banner">Visual Protobuf</div>
 
-<div class="container">
+<div id="menu">
+    <div class="row">
+        <a href="#" id="button-sample" title="Will load a sample file as a demo">CLICK to load sample message</a>
+        <div id="drop-single" class="drop-zone" title="Must be a binary file containing only the serialized protobuf message">DROP file with single message</div>
+        <div id="drop-multiple" class="drop-zone" title="Must be a binary file containing a series of serialized protobuf messages where each message is preceded by a 16-bit big endian field containing its size in bytes">DROP file with multiple messages</div>
+    </div>
+    <div id="menu-description"></div>
+</div>
+
+<div class="container hidden">
     <div id="title"></div>
     <p>(press `&lt;` and `&gt;` to change selected message)</p>
     <div id="message-container"></div>
